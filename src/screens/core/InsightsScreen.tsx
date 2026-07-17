@@ -14,6 +14,7 @@ import {
   selectCategoryBreakdown,
   selectMostExpensive,
   selectArchived,
+  toMonthly,
 } from '../../store/subscriptionsStore';
 import { useSettingsStore } from '../../store/settingsStore';
 import { formatMoney } from '../../utils/format';
@@ -38,7 +39,9 @@ export function InsightsScreen() {
 
   const topCategory = categoryBreakdown[0];
   const topCategoryName = categoryName(categories.find((c) => c.id === topCategory?.categoryId), t);
-  const potentialSavings = archived.reduce((sum, s) => sum + s.cost * 12, 0);
+  const cancelled = archived.filter((s) => s.status === 'cancelled');
+  const potentialSavings = cancelled.reduce((sum, s) => sum + toMonthly(s.cost, s.billingCycle) * 12, 0);
+  const avgPerSub = active.length > 0 ? monthlySpend / active.length : 0;
 
   if (active.length === 0) {
     return (
@@ -57,7 +60,7 @@ export function InsightsScreen() {
 
       <View style={styles.statRow}>
         <StatTile label={t('insights.thisMonth')} value={formatMoney(monthlySpend, currency)} />
-        <StatTile label={t('insights.vsLastMonth')} value="+4.2%" trend={t('insights.trendingUp')} trendPositive={false} />
+        <StatTile label={t('insights.avgPerSub')} value={formatMoney(avgPerSub, currency)} />
       </View>
 
       {topCategory && (
@@ -99,7 +102,7 @@ export function InsightsScreen() {
         ))}
       </Card>
 
-      {archived.length > 0 && (
+      {cancelled.length > 0 && (
         <View style={[styles.banner, { backgroundColor: colors.statusSuccessBg, borderRadius: radius.lg }]}>
           <Text style={[textType.caption, { color: colors.statusSuccess }]}>{t('insights.savedByCancelling')}</Text>
           <Text style={[textType.subheading, { color: colors.statusSuccess, marginTop: 2 }]}>{t('insights.thisYear', { amount: formatMoney(potentialSavings, currency) })}</Text>

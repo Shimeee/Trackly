@@ -1,6 +1,8 @@
 import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 import { Subscription } from '../store/subscriptionsStore';
+import i18n from '../i18n';
+import { formatLongDate } from './format';
 
 const CHANNEL_ID = 'reminders';
 
@@ -72,20 +74,32 @@ export async function syncReminderNotifications(subscriptions: Subscription[], e
             sub.id,
             `renew-${days}`,
             fireDate,
-            `${sub.name} renews in ${days} day${days === 1 ? '' : 's'}`,
-            `${sub.name} will renew on ${billingDate.toLocaleDateString()}.`
+            i18n.t('notifications.renewsInTitle', { name: sub.name, count: days }),
+            i18n.t('notifications.renewsOnBody', { name: sub.name, date: formatLongDate(sub.nextBillingDate) })
           );
         }
       }
       if (sub.reminders.onBillingDate && billingDate.getTime() > now) {
-        await scheduleFor(sub.id, 'renew-0', billingDate, `${sub.name} renews today`, `${sub.name} is renewing today.`);
+        await scheduleFor(
+          sub.id,
+          'renew-0',
+          billingDate,
+          i18n.t('notifications.renewsTodayTitle', { name: sub.name }),
+          i18n.t('notifications.renewsTodayBody', { name: sub.name })
+        );
       }
     }
 
     if (sub.reminders.freeTrialEnding && sub.isFreeTrial && sub.trialEndsDate) {
       const trialDate = new Date(sub.trialEndsDate);
       if (trialDate.getTime() > now) {
-        await scheduleFor(sub.id, 'trial-end', trialDate, `${sub.name} trial ending`, `Your ${sub.name} free trial ends today.`);
+        await scheduleFor(
+          sub.id,
+          'trial-end',
+          trialDate,
+          i18n.t('notifications.trialEndingTitle', { name: sub.name }),
+          i18n.t('notifications.trialEndingBody', { name: sub.name })
+        );
       }
     }
   }

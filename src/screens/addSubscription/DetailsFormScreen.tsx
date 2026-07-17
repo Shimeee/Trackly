@@ -97,35 +97,34 @@ export function DetailsFormScreen() {
         </View>
       </View>
 
-      <View style={styles.row2}>
-        <View style={{ flex: 1, gap: 8 }}>
-          <Text style={[textType.caption, { color: colors.textSecondary }]}>{t('detailsForm.cost')}</Text>
-          <TextInput
-            value={cost}
-            onChangeText={setCost}
-            placeholder={`${currency} 0`}
-            keyboardType="decimal-pad"
-            placeholderTextColor={colors.textTertiary}
-            style={[styles.input, textType.body, { color: colors.textPrimary, borderColor: colors.borderDefault, borderRadius: radius.lg }]}
-          />
-        </View>
-        <View style={{ flex: 1, gap: 8 }}>
-          <Text style={[textType.caption, { color: colors.textSecondary }]}>{t('detailsForm.billingCycle')}</Text>
-          <View style={{ flexDirection: 'row', gap: 6 }}>
-            {(['Monthly', 'Yearly', 'Weekly'] as const).map((c) => (
-              <Pressable
-                key={c}
-                onPress={() => setBillingCycle(c)}
-                style={[
-                  styles.cycleChip,
-                  { borderColor: colors.borderDefault, borderRadius: radius.md },
-                  billingCycle === c && { backgroundColor: colors.accentSubtleBg, borderColor: colors.accentPrimary },
-                ]}
-              >
-                <Text style={[textType.caption, { color: billingCycle === c ? colors.accentPrimary : colors.textSecondary }]}>{CYCLE_LABELS[c][0]}</Text>
-              </Pressable>
-            ))}
-          </View>
+      <View style={{ gap: 8 }}>
+        <Text style={[textType.caption, { color: colors.textSecondary }]}>{t('detailsForm.cost')}</Text>
+        <TextInput
+          value={cost}
+          onChangeText={setCost}
+          placeholder={`${currency} 0`}
+          keyboardType="decimal-pad"
+          placeholderTextColor={colors.textTertiary}
+          style={[styles.input, textType.body, { color: colors.textPrimary, borderColor: colors.borderDefault, borderRadius: radius.lg }]}
+        />
+      </View>
+
+      <View style={{ gap: 8 }}>
+        <Text style={[textType.caption, { color: colors.textSecondary }]}>{t('detailsForm.billingCycle')}</Text>
+        <View style={{ flexDirection: 'row', gap: 8 }}>
+          {(['Monthly', 'Yearly', 'Weekly'] as const).map((c) => (
+            <Pressable
+              key={c}
+              onPress={() => setBillingCycle(c)}
+              style={[
+                styles.cycleChip,
+                { borderColor: colors.borderDefault, borderRadius: radius.md },
+                billingCycle === c && { backgroundColor: colors.accentSubtleBg, borderColor: colors.accentPrimary },
+              ]}
+            >
+              <Text numberOfLines={1} style={[textType.bodySmall, { color: billingCycle === c ? colors.accentPrimary : colors.textSecondary }]}>{CYCLE_LABELS[c]}</Text>
+            </Pressable>
+          ))}
         </View>
       </View>
 
@@ -182,8 +181,7 @@ const styles = StyleSheet.create({
   input: { height: 48, borderWidth: 1, paddingHorizontal: 16 },
   chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   chip: { paddingHorizontal: 14, paddingVertical: 8, borderWidth: 1 },
-  row2: { flexDirection: 'row', gap: 16 },
-  cycleChip: { flex: 1, height: 48, alignItems: 'center', justifyContent: 'center', borderWidth: 1 },
+  cycleChip: { flex: 1, height: 48, alignItems: 'center', justifyContent: 'center', borderWidth: 1, paddingHorizontal: 4 },
   dateChip: { paddingHorizontal: 12, paddingVertical: 6, borderWidth: 1 },
   toggleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   summary: { padding: 16 },

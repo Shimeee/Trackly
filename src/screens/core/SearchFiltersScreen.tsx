@@ -10,6 +10,8 @@ import { SubscriptionListItem } from '../../components/SubscriptionListItem';
 import { useTheme } from '../../theme/ThemeProvider';
 import { type as textType } from '../../theme/typography';
 import { useSubscriptionsStore, SubStatus } from '../../store/subscriptionsStore';
+import { useSettingsStore } from '../../store/settingsStore';
+import { categoryName } from '../../utils/categoryLabel';
 import { RootStackParamList } from '../../navigation/types';
 
 export function SearchFiltersScreen() {
@@ -24,15 +26,25 @@ export function SearchFiltersScreen() {
     { label: t('searchFilters.filterCancelled'), value: 'cancelled' },
   ];
   const subscriptions = useSubscriptionsStore((s) => s.subscriptions);
+  const categories = useSettingsStore((s) => s.categories);
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState<SubStatus | 'all'>('all');
 
   const results = useMemo(() => {
+    const q = query.trim().toLowerCase();
     return subscriptions
       .filter((s) => filter === 'all' || s.status === filter)
-      .filter((s) => s.name.toLowerCase().includes(query.toLowerCase()))
+      .filter((s) => {
+        if (!q) return true;
+        const cat = categories.find((c) => c.id === s.categoryId);
+        return (
+          s.name.toLowerCase().includes(q) ||
+          (s.notes || '').toLowerCase().includes(q) ||
+          categoryName(cat, t).toLowerCase().includes(q)
+        );
+      })
       .sort((a, b) => new Date(a.nextBillingDate).getTime() - new Date(b.nextBillingDate).getTime());
-  }, [subscriptions, query, filter]);
+  }, [subscriptions, query, filter, categories, t]);
 
   return (
     <Screen>

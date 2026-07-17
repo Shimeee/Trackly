@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
@@ -20,7 +20,13 @@ export function AuthScreen() {
         <Text style={[textType.title, { color: colors.textPrimary }]}>{t('auth.welcome')}</Text>
         <Text style={[textType.body, { color: colors.textTertiary, marginTop: 8 }]}>{t('auth.subtitle')}</Text>
       </View>
-      <View style={{ flex: 1 }} />
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+        <Image
+          source={require('../../../assets/trackly_mark.png')}
+          style={{ width: 140, height: 140 }}
+          resizeMode="contain"
+        />
+      </View>
       <View style={{ gap: 12 }}>
         <Button label={t('auth.signUp')} onPress={() => navigation.navigate('SignUp')} />
         <Button label={t('auth.signIn')} variant="secondary" onPress={() => navigation.navigate('SignIn')} />

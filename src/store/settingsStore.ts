@@ -99,6 +99,7 @@ export const useSettingsStore = create<SettingsState>()(
       resetAccount: () =>
         set({
           appearance: 'system',
+          language: 'system',
           currency: 'EGP',
           region: 'Egypt',
           dateFormat: 'DD/MM/YYYY',

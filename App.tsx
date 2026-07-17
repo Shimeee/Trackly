@@ -33,6 +33,10 @@ function AppShell() {
   useLanguageSync();
 
   useEffect(() => {
+    useSubscriptionsStore.getState().rolloverDueDates();
+  }, []);
+
+  useEffect(() => {
     syncReminderNotifications(subscriptions, notificationsEnabled);
   }, [subscriptions, notificationsEnabled]);
 

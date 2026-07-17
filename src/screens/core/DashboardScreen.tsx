@@ -84,7 +84,7 @@ export function DashboardScreen() {
       ) : (
         <>
           <View style={styles.statRow}>
-            <StatTile label={t('dashboard.monthlySpend')} value={formatMoney(monthlySpend, currency)} trend={active.length > 0 ? t('dashboard.trendVsLastMonth') : undefined} />
+            <StatTile label={t('dashboard.monthlySpend')} value={formatMoney(monthlySpend, currency)} />
             <StatTile label={t('dashboard.yearlyProjected')} value={formatMoney(yearlyProjected, currency)} />
           </View>
 

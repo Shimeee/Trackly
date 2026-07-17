@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import i18n from '../i18n';
 
 export type BillingCycle = 'Monthly' | 'Yearly' | 'Weekly';
 export type SubStatus = 'active' | 'trial' | 'paused' | 'cancelled';
@@ -56,6 +57,18 @@ function daysUntil(dateIso: string): number {
   return Math.round(ms / 86400000);
 }
 
+function advanceByCycle(dateIso: string, cycle: BillingCycle): string {
+  const d = new Date(dateIso);
+  if (cycle === 'Monthly') d.setMonth(d.getMonth() + 1);
+  else if (cycle === 'Yearly') d.setFullYear(d.getFullYear() + 1);
+  else d.setDate(d.getDate() + 7);
+  return d.toISOString();
+}
+
+function makeNotification(subscriptionId: string, title: string, body: string): NotificationItem {
+  return { id: uid(), subscriptionId, title, body, createdAt: new Date().toISOString(), read: false };
+}
+
 type SubscriptionsState = {
   subscriptions: Subscription[];
   notifications: NotificationItem[];
@@ -65,6 +78,7 @@ type SubscriptionsState = {
   cancelSubscription: (id: string) => void;
   restoreSubscription: (id: string) => void;
   deleteSubscription: (id: string) => void;
+  rolloverDueDates: () => void;
   markAllNotificationsRead: () => void;
   clearAll: () => void;
 };
@@ -87,14 +101,7 @@ export const useSubscriptionsStore = create<SubscriptionsState>()(
         set((s) => ({
           subscriptions: [sub, ...s.subscriptions],
           notifications: [
-            {
-              id: uid(),
-              subscriptionId: sub.id,
-              title: 'Subscription added',
-              body: `${sub.name} was added to your subscriptions.`,
-              createdAt: now,
-              read: false,
-            },
+            makeNotification(sub.id, i18n.t('notifications.addedTitle'), i18n.t('notifications.addedBody', { name: sub.name })),
             ...s.notifications,
           ],
         }));
@@ -135,6 +142,63 @@ export const useSubscriptionsStore = create<SubscriptionsState>()(
 
       deleteSubscription: (id) => {
         set((s) => ({ subscriptions: s.subscriptions.filter((sub) => sub.id !== id) }));
+      },
+
+      rolloverDueDates: () => {
+        const todayStart = new Date().setHours(0, 0, 0, 0);
+        const nowIso = new Date().toISOString();
+        const newNotifications: NotificationItem[] = [];
+        let changed = false;
+
+        const subscriptions = get().subscriptions.map((original) => {
+          let sub = original;
+
+          if (sub.status === 'trial' && sub.trialEndsDate && new Date(sub.trialEndsDate).getTime() < todayStart) {
+            changed = true;
+            if (sub.autoRenew) {
+              sub = { ...sub, status: 'active', isFreeTrial: false, updatedAt: nowIso };
+              newNotifications.push(
+                makeNotification(sub.id, i18n.t('notifications.trialConvertedTitle'), i18n.t('notifications.trialConvertedBody', { name: sub.name }))
+              );
+            } else {
+              sub = { ...sub, status: 'cancelled', updatedAt: nowIso };
+              newNotifications.push(
+                makeNotification(sub.id, i18n.t('notifications.expiredTitle'), i18n.t('notifications.expiredBody', { name: sub.name }))
+              );
+            }
+          }
+
+          if (sub.status === 'active' && new Date(sub.nextBillingDate).getTime() < todayStart) {
+            changed = true;
+            if (sub.autoRenew) {
+              let nextDate = sub.nextBillingDate;
+              while (new Date(nextDate).getTime() < todayStart) {
+                nextDate = advanceByCycle(nextDate, sub.billingCycle);
+              }
+              sub = { ...sub, nextBillingDate: nextDate, updatedAt: nowIso };
+              const months = i18n.t('calendar.months', { returnObjects: true }) as string[];
+              const d = new Date(nextDate);
+              newNotifications.push(
+                makeNotification(
+                  sub.id,
+                  i18n.t('notifications.renewedTitle'),
+                  i18n.t('notifications.renewedBody', { name: sub.name, date: `${d.getDate()} ${months[d.getMonth()]}` })
+                )
+              );
+            } else {
+              sub = { ...sub, status: 'cancelled', updatedAt: nowIso };
+              newNotifications.push(
+                makeNotification(sub.id, i18n.t('notifications.expiredTitle'), i18n.t('notifications.expiredBody', { name: sub.name }))
+              );
+            }
+          }
+
+          return sub;
+        });
+
+        if (changed) {
+          set((s) => ({ subscriptions, notifications: [...newNotifications, ...s.notifications] }));
+        }
       },
 
       markAllNotificationsRead: () => {
