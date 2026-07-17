@@ -2,24 +2,49 @@
   "expo": {
     "name": "trackly",
     "slug": "trackly",
-    "version": "1.0.0",
+    "version": "1.6.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/trackly_logo.png",
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true
     },
     "android": {
+      "versionCode": 7,
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
+        "backgroundColor": "#4338CA",
+        "foregroundImage": "./assets/trackly_logo.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.anonymous.trackly"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": "./assets/trackly_mark.png"
+    },
+    "plugins": [
+      "expo-font",
+      "expo-notifications",
+      "@react-native-google-signin/google-signin",
+      "expo-localization"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "d1a65c73-2d71-41a8-a0a9-955b2d3ff983"
+      },
+      "googleWebClientId": "",
+      "supabaseUrl": "https://zebubbkgbdrkbunhugph.supabase.co",
+      "supabaseAnonKey": "sb_publishable_8vvBM1hMKHC-24qY6IWqbQ_PL8pjHTS"
+    },
+    "owner": "shimeee",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/d1a65c73-2d71-41a8-a0a9-955b2d3ff983",
+      "requestHeaders": {
+        "expo-channel-name": "production"
+      }
     }
   }
 }
